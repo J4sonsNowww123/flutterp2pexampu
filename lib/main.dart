@@ -60,6 +60,9 @@ class Home extends StatelessWidget {
             child: InkWell(
               onTap: () {
                 Navigator.pushNamed(context, 'browser');
+                //DevicesListScreen(deviceType: DeviceType.browser));
+                //DeviceListScreen gets the deviceType DeviceType.browser fed
+                // Through this the DeviceListScreen knows what to do next, if it's a browser.
               },
               child: Container(
                 color: Colors.red,
@@ -75,6 +78,7 @@ class Home extends StatelessWidget {
             child: InkWell(
               onTap: () {
                 Navigator.pushNamed(context, 'advertiser');
+                // Opens
               },
               child: Container(
                 color: Colors.green,
@@ -95,6 +99,8 @@ class Home extends StatelessWidget {
 enum DeviceType { advertiser, browser }
 
 class DevicesListScreen extends StatefulWidget {
+  //Devices like DeviceType.browser and DeviceType.advertiser are given here
+  //and made into objects.
   const DevicesListScreen({required this.deviceType});
 
   final DeviceType deviceType;
@@ -104,22 +110,36 @@ class DevicesListScreen extends StatefulWidget {
 }
 
 class _DevicesListScreenState extends State<DevicesListScreen> {
+  //A List is made of all the devices which are found
   List<Device> devices = [];
   List<Device> connectedDevices = [];
+  //A List is made of all the devices which are connected.
   late NearbyService nearbyService;
   late StreamSubscription subscription;
   late StreamSubscription receivedDataSubscription;
-
+  //Some variables are declared, which later will be defined
   bool isInit = false;
 
+  //When the Widget is created, initState is initialized as an instance of this widget.
+
+  //BROWSER STEP: 1
+
+  /*
+  * ADVERTISER STEP: 1
+  */
+
+  //STARTUP INITIALIZING
   @override
   void initState() {
+    print("Line 126");
     super.initState();
     init();
   }
 
+  //Shutdown the the search
   @override
   void dispose() {
+    print("Line 134");
     subscription.cancel();
     receivedDataSubscription.cancel();
     nearbyService.stopBrowsingForPeers();
@@ -195,7 +215,14 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
             }));
   }
 
+  //ALSO GIVES THE STATE IF SOMETHING HAS BEEN CONNECTED, IS WAITING OR DISCONNECTED.
   String getStateName(SessionState state) {
+    //BROWSER STEP: 6
+
+    /*
+    * ADVERTISER STEP: 6
+    */
+    print("Line 212");
     switch (state) {
       case SessionState.notConnected:
         return "disconnected";
@@ -206,7 +233,17 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
     }
   }
 
+  //Says if the button connect or disconnect was pressed.
+  //Maybe it changes also the text of the button, because of the setState
+
+  //CHANGES THE STATE OF THE BUTTON CONNECTED OR DISCONNECTED, LIKE A SWITCH
   String getButtonStateName(SessionState state) {
+    //BROWSER STEP: 9
+
+    /*
+    * ADVERTISER STEP: 9
+    */
+    print("Line 226");
     switch (state) {
       case SessionState.notConnected:
       case SessionState.connecting:
@@ -216,7 +253,15 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
     }
   }
 
+  //CHANGES THE STATE OF THE BUTTON COLOURS NOT CONNECTED, CONNECTING AND DISCONNECTED
   Color getStateColor(SessionState state) {
+    //BROWSER STEP: 7
+
+    /*
+    * ADVERTISER STEP: 7
+    */
+
+    print("Line 238");
     switch (state) {
       case SessionState.notConnected:
         return Colors.black;
@@ -227,7 +272,14 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
     }
   }
 
+  //CHANGES THE COLOURS OF THE BUTTON FROM RED TO GREEN, LIKE A SWITCH
   Color getButtonColor(SessionState state) {
+    //BROWSER STEP: 8
+
+    /*
+    * ADVERTISER STEP: 8
+    */
+    print("Line 252");
     switch (state) {
       case SessionState.notConnected:
       case SessionState.connecting:
@@ -237,8 +289,22 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
     }
   }
 
+  //DEVICE SELECTION HANDLER
   _onTabItemListener(Device device) {
+    //BROWSER STEP: 11 (The device was clicked on, to send a message.)
+
+    /*
+    * ADVERTISER STEP: 11 (The device was clicked on, to send a message.)
+    */
+
+    //HANDLES THE SENDING OF THE MESSAGE IF THE DEVICE IS CONNECTED
+    print("Line 263");
     if (device.state == SessionState.connected) {
+      //BROWSER STEP: 12
+      /*
+      * ADVERTISER STEP: 12
+      */
+      print("Line 265");
       showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -256,6 +322,12 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
                 TextButton(
                   child: Text("Send"),
                   onPressed: () {
+                    //BROWSER STEP: 13
+                    /*
+                    * ADVERTISER STEP: 13
+                    */
+
+                    //CALLING A HANDLER TO ACTUALLY SEND THE MESSAGE
                     nearbyService.sendMessage(
                         device.deviceId, myController.text);
                     myController.text = '';
@@ -267,7 +339,17 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
     }
   }
 
+  //CONNECT AND DISCONNECT
   int getItemCount() {
+    //BROWSER STEP: 3
+    //BROWSER STEP: 5
+    //BROWSER STEP: 15 (Connection finished.)
+    /*
+    * ADVERTISER STEP: 3
+    * ADVERTISER STEP: 5
+    * ADVERTISER STEP: 15 (Connection finished.)
+    */
+    print("Line 295");
     if (widget.deviceType == DeviceType.advertiser) {
       return connectedDevices.length;
     } else {
@@ -275,7 +357,11 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
     }
   }
 
+  //HANDLING THE BUTTON CLICK OF CONNECT AND DISCONNECT
   _onButtonClicked(Device device) {
+    //BROWSER STEP: 10 (The Advertiser has now been connected to the browser. The whole process
+    //of button pressing has been documented.)
+    print("Line 304");
     switch (device.state) {
       case SessionState.notConnected:
         nearbyService.invitePeer(
@@ -291,7 +377,14 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
     }
   }
 
+  //INIT IS CALLED AND THE DEVICE MODEL IS SET. (ANDROID IOS)
   void init() async {
+    //BROWSER STEP: 2
+
+    /*
+    * ADVERTISER STEP: 2
+    */
+    print("Line 321");
     nearbyService = NearbyService();
     String devInfo = '';
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
@@ -337,7 +430,16 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
         }
       });
 
+      //CHECKS FOR DEVICES AND SHOWS YOU THEIR STATE
       setState(() {
+        //BROWSER STEP: 4 (I wait for another device and search for it.)
+        //BROWSER STEP: 14 (The Connection is ended.)
+
+        /*
+        * ADVERTISER STEP: 4 (The Browser connects to this Advertiser after being found)
+        * ADVERTISER STEP: 14 (The Connection is ended.)
+        */
+        print("Line 368");
         devices.clear();
         devices.addAll(devicesList);
         connectedDevices.clear();
@@ -347,6 +449,7 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
       });
     });
 
+    //Message received
     receivedDataSubscription =
         nearbyService.dataReceivedSubscription(callback: (data) {
       print("TheMessage: ${jsonEncode(data)}");
