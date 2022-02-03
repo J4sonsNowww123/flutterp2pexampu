@@ -6,11 +6,15 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nearby_connections/flutter_nearby_connections.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
+import 'package:logger/logger.dart';
 
 void main() {
   runApp(MyApp());
 }
 
+var logger = Logger(
+  printer: PrettyPrinter(),
+);
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case '/':
@@ -24,9 +28,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     default:
       return MaterialPageRoute(
           builder: (_) => Scaffold(
-            body: Center(
-                child: Text('No route defined for ${settings.name}')),
-          ));
+                body: Center(
+                    child: Text('No route defined for ${settings.name}')),
+              ));
   }
 }
 
@@ -46,6 +50,12 @@ class Home extends StatelessWidget {
     return Scaffold(
       body: Column(
         children: [
+          TextButton(
+            child: Text("Log"),
+            onPressed: () {
+              logger.d('TEST LOGGING!');
+            },
+          ),
           Expanded(
             child: InkWell(
               onTap: () {
@@ -55,9 +65,9 @@ class Home extends StatelessWidget {
                 color: Colors.red,
                 child: Center(
                     child: Text(
-                      'BROWSER',
-                      style: TextStyle(color: Colors.white, fontSize: 40),
-                    )),
+                  'BROWSER',
+                  style: TextStyle(color: Colors.white, fontSize: 40),
+                )),
               ),
             ),
           ),
@@ -70,9 +80,9 @@ class Home extends StatelessWidget {
                 color: Colors.green,
                 child: Center(
                     child: Text(
-                      'ADVERTISER',
-                      style: TextStyle(color: Colors.white, fontSize: 40),
-                    )),
+                  'ADVERTISER',
+                  style: TextStyle(color: Colors.white, fontSize: 40),
+                )),
               ),
             ),
           ),
@@ -138,19 +148,19 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
                       children: [
                         Expanded(
                             child: GestureDetector(
-                              onTap: () => _onTabItemListener(device),
-                              child: Column(
-                                children: [
-                                  Text(device.deviceName),
-                                  Text(
-                                    getStateName(device.state),
-                                    style: TextStyle(
-                                        color: getStateColor(device.state)),
-                                  ),
-                                ],
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                          onTap: () => _onTabItemListener(device),
+                          child: Column(
+                            children: [
+                              Text(device.deviceName),
+                              Text(
+                                getStateName(device.state),
+                                style: TextStyle(
+                                    color: getStateColor(device.state)),
                               ),
-                            )),
+                            ],
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                          ),
+                        )),
                         // Request connect
                         GestureDetector(
                           onTap: () => _onButtonClicked(device),
@@ -250,7 +260,7 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
                         device.deviceId, myController.text);
                     myController.text = '';
                   },
-                )
+                ),
               ],
             );
           });
@@ -300,7 +310,6 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
         callback: (isRunning) async {
           if (isRunning) {
             if (widget.deviceType == DeviceType.browser) {
-
               await nearbyService.stopBrowsingForPeers();
               await Future.delayed(Duration(microseconds: 200));
               await nearbyService.startBrowsingForPeers();
@@ -315,38 +324,37 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
         });
     subscription =
         nearbyService.stateChangedSubscription(callback: (devicesList) {
-          devicesList.forEach((element) {
-            print(
-                " deviceId: ${element.deviceId} | deviceName: ${element.deviceName} | state: ${element.state}");
+      devicesList.forEach((element) {
+        print(
+            " deviceId: ${element.deviceId} | deviceName: ${element.deviceName} | state: ${element.state}");
 
-            if (Platform.isAndroid) {
-              if (element.state == SessionState.connected) {
-                nearbyService.stopBrowsingForPeers();
-              } else {
-                nearbyService.startBrowsingForPeers();
-              }
-            }
-          });
+        if (Platform.isAndroid) {
+          if (element.state == SessionState.connected) {
+            nearbyService.stopBrowsingForPeers();
+          } else {
+            nearbyService.startBrowsingForPeers();
+          }
+        }
+      });
 
-          setState(() {
-            devices.clear();
-            devices.addAll(devicesList);
-            connectedDevices.clear();
-            connectedDevices.addAll(devicesList
-                .where((d) => d.state == SessionState.connected)
-                .toList());
-          });
-        });
+      setState(() {
+        devices.clear();
+        devices.addAll(devicesList);
+        connectedDevices.clear();
+        connectedDevices.addAll(devicesList
+            .where((d) => d.state == SessionState.connected)
+            .toList());
+      });
+    });
 
     receivedDataSubscription =
-        nearbyService.dataReceivedSubscription(callback: (data)
-    {
-      print("dataReceivedSubscription: ${jsonEncode(data)}");
+        nearbyService.dataReceivedSubscription(callback: (data) {
+      print("TheMessage: ${jsonEncode(data)}");
       showToast(jsonEncode(data),
-              context: context,
-              axis: Axis.horizontal,
-              alignment: Alignment.center,
-              position: StyledToastPosition.bottom);
-        });
+          context: context,
+          axis: Axis.horizontal,
+          alignment: Alignment.center,
+          position: StyledToastPosition.bottom);
+    });
   }
 }

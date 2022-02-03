@@ -30,6 +30,7 @@ dependencies:
   flutter_nearby_connections: ^1.1.1
   flutter_styled_toast: ^2.0.0
   device_info_plus: ^3.2.1
+  logger: ^1.1.0
   flutter:
     sdk: flutter
 
